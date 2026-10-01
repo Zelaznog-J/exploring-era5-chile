@@ -86,10 +86,13 @@ Todas las figuras están en [`agregados_tp/figuras/`](agregados_tp/figuras/), y 
 pip install xarray dask distributed netCDF4 zarr gcsfs scipy matplotlib geopandas shapely flox
 ```
 
+Las rutas se configuran con variables de entorno, así que no hay que editar el código:
+
+- `ERA5_DIR`: carpeta base del proyecto, donde se guardan la caché, los NetCDF diarios y los productos agregados. La leen los dos notebooks.
+- `ERA5_REGIONES`: ruta a `chile_region.geojson`, que se obtiene con el [proyecto de límites administrativos](https://github.com/Zelaznog-J/extraccion-limites-administrativos-overture). La lee el notebook de precipitación.
+
 1. Ejecuta `era5_extraccion_diario.ipynb`. Descarga desde ARCO-ERA5 con caché anual (`cache_era5_chile/`) y genera los NetCDF diarios en `diario_era5_chile/`. Son varios GB, por eso no están en el repositorio.
-2. Ejecuta `era5_agregacion_precipitacion.ipynb`. Las rutas se configuran con variables de entorno:
-   - `ERA5_DIR`: carpeta base del proyecto.
-   - `ERA5_REGIONES`: ruta a `chile_region.geojson`, que se obtiene con el [proyecto de límites administrativos](https://github.com/Zelaznog-J/extraccion-limites-administrativos-overture).
+2. Ejecuta `era5_agregacion_precipitacion.ipynb`, que lee el diario del paso anterior y escribe los productos en `agregados_tp/`.
 
 Los productos NetCDF (`agregados_tp/*.nc`) tampoco se versionan porque se regeneran en el paso 2.
 
