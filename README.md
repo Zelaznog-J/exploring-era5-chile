@@ -9,7 +9,7 @@ cola de descargas.
 |---|---|---|
 | 1. Extracción horaria → diaria | [`era5_extraccion_diario.ipynb`](era5_extraccion_diario.ipynb) | ✅ |
 | 2. Precipitación: agregación, extremos y tendencias | [`era5_agregacion_precipitacion.ipynb`](era5_agregacion_precipitacion.ipynb) | ✅ |
-| 3. Temperatura | `era5_agregacion_temperatura.ipynb` | 🚧 en desarrollo |
+| 3. Temperatura: agregación, extremos, grados-día y tendencias | [`era5_agregacion_temperatura.ipynb`](era5_agregacion_temperatura.ipynb) | ✅ |
 
 ---
 
@@ -80,6 +80,82 @@ Todas las figuras están en [`agregados_tp/figuras/`](agregados_tp/figuras/), y 
 
 ---
 
+## Temperatura en Chile 2000–2025
+
+![Tendencia de la temperatura media, máxima y mínima 2000–2025](agregados_t2m/figuras/08_tendencia_anual.png)
+
+Este proyecto convierte 26 años de temperatura diaria a 2 m en medias
+mensuales, estacionales y anuales, índices de extremos, grados-día y
+tendencias para Chile continental. Reutiliza el flujo con Dask del proyecto de
+precipitación.
+
+| Aspecto | Detalle |
+|---|---|
+| Fuente | ERA5 (ARCO, Google Cloud), temperatura media, máxima y mínima diaria en °C, más la amplitud térmica diaria (`dtr = tmax − tmin`) |
+| Período | 2000-01-01 a 2025-12-31 (9.497 días; 312 meses, 103 estaciones y 26 años completos) |
+| Grilla | 0,25° (~25 km), 157 × 45 celdas; 1.254 celdas dentro de Chile |
+| Unidades espaciales | 5 zonas por latitud (Norte Grande, Norte Chico, Centro, Sur, Austral), total Chile y 9 ciudades de Arica a Punta Arenas |
+| Herramientas | Python: xarray, Dask, flox, GeoPandas, shapely, SciPy, matplotlib |
+
+### Qué hace
+
+1. **Agregación temporal.** Calcula medias mensuales, estacionales (DJF, MAM, JJA, SON) y anuales de la media, la máxima, la mínima y la amplitud diaria. Solo conserva los períodos completos. No calcula año hidrológico, que para temperatura no tiene sentido físico.
+2. **Índices de extremos tipo ETCCDI.** TXx, TXn, TNx, TNn, FD (heladas), ID (días de hielo), SU (días > 25 °C), TR (noches tropicales), TX90p, TN10p y rachas máximas de días cálidos y de heladas.
+3. **Grados-día.** De crecimiento (GDD, base 10 °C) y de calefacción (HDD, base 18 °C), útiles para agricultura y energía.
+4. **Climatologías y anomalías.** Calcula anomalías en °C y estandarizadas (z) respecto de 2000–2025, y la amplitud del ciclo anual.
+5. **Agregación espacial.** Saca medias ponderadas por área (cos de la latitud) por zona y series de la celda más cercana a cada ciudad.
+6. **Tendencias.** Ajusta una regresión lineal de las temperaturas anuales en °C/década, con valor p, por celda y por zona.
+
+### Decisiones técnicas
+
+- **Promedio, no suma.** A diferencia de la precipitación, la temperatura se agrega con promedios; los conteos de días (heladas, días > 25 °C) sí se suman.
+- **Dask perezoso, cómputo único.** Igual que en precipitación: las secciones 2 a 6 arman grafos y cada producto se calcula en memoria una vez, antes de escribir el NetCDF.
+- **Percentiles por mes calendario.** TX90p y TN10p usan percentiles por mes calendario, una simplificación de la ventana de 5 días de ETCCDI.
+- **Rachas sin cruzar el cambio de año**, con una función vectorizada vía `apply_ufunc`.
+- **Anomalías en °C y z, no en %**, porque la escala en °C no tiene un cero útil.
+- **Tendencias sin bucles por celda**, con `xarray.cov` y `xarray.corr`.
+- **Máscara de Chile y ciudades** como en precipitación: GeoJSON de las 16 regiones para las zonas y celda más cercana sin máscara para las ciudades.
+
+### Validación
+
+- **Conservación de medias.** La media de los meses ponderada por días es igual a la media anual, y las estaciones son iguales a los meses (tolerancia de 0,001 °C).
+- **Orden físico.** Se cumple `tmin ≤ tmedia ≤ tmax`, `TNn ≤ tmin` y `tmax ≤ TXx` en todas las celdas.
+- **Coherencia de índices.** ID ≤ FD, conteos entre 0 y 366 y porcentajes entre 0 y 100.
+
+### Resultados
+
+Entre 2000 y 2025 Chile se calienta 0,27 °C por década (p = 0,001), y las máximas suben casi el doble que las mínimas.
+
+| Zona | T media (°C) | Tendencia T media (°C/década) | Tendencia T máx (°C/década) | Tendencia T mín (°C/década) | Heladas (días/año) | Año más cálido | Año más frío |
+|---|---|---|---|---|---|---|---|
+| Norte Grande | 12,4 | **+0,24** (p = 0,03) | +0,20 (p = 0,11) | **+0,27** (p = 0,02) | 73 | 2023 | 2022 |
+| Norte Chico | 9,6 | **+0,27** (p = 0,04) | **+0,43** (p = 0,009) | +0,20 (p = 0,12) | 103 | 2023 | 2022 |
+| Centro | 10,8 | **+0,27** (p = 0,009) | **+0,53** (p < 0,001) | +0,03 (p = 0,79) | 66 | 2020 | 2007 |
+| Sur | 9,9 | +0,17 (p = 0,09) | **+0,36** (p = 0,008) | +0,01 (p = 0,88) | 42 | 2016 | 2007 |
+| Austral | 5,2 | **+0,34** (p = 0,002) | **+0,41** (p = 0,003) | **+0,29** (p = 0,002) | 99 | 2021 | 2002 |
+| Chile | 9,0 | **+0,27** (p = 0,001) | **+0,37** (p < 0,001) | **+0,20** (p = 0,01) | 81 | 2016 | 2000 |
+
+En negrita, tendencias significativas (p < 0,05).
+
+- **Calentamiento generalizado.** El 98 % de las celdas tiene tendencia positiva en la media, y el 59,2 % (742 de 1.254) es significativa. La década 2016–2025 es 0,45 °C más cálida que 2000–2009.
+- **Máximas más que mínimas.** En el Centro y el Sur las mínimas no cambian, así que la amplitud térmica diaria crece 0,50 y 0,35 °C/década (p < 0,001). En la celda de Santiago la máxima sube 0,73 °C/década y la mínima −0,02.
+- **Mínimas que se enfrían en la costa.** Hay 26 celdas con tendencia negativa significativa en la mínima, entre ~28,5°S y ~34°S.
+- **Más extremos cálidos.** Los días sobre el percentil 90 (TX90p) suben 3,0 puntos por década en Chile y 4,5 en el Centro. Las noches frías (TN10p) no muestran cambio significativo.
+- **Agricultura y energía.** Los grados-día de crecimiento del Centro suben 63 °C·día por década, y los de calefacción bajan 92 °C·día por década en Chile.
+
+![Mapas de extremos y grados-día: heladas, días > 25 °C, HDD, TXx, TNn y GDD](agregados_t2m/figuras/07_mapas_indices_extremos.png)
+
+Todas las figuras están en [`agregados_t2m/figuras/`](agregados_t2m/figuras/), y las series por zona y ciudad en CSV en [`agregados_t2m/`](agregados_t2m/).
+
+### Limitaciones
+
+- Cada zona mezcla costa, valle y cordillera, así que su media depende de la fracción de celdas andinas (por eso el Norte Chico parece más frío que el Centro).
+- Una celda de ~25 km no representa una estación puntual, y en la costa la celda mixta mar-tierra suaviza la amplitud diaria.
+- El día ERA5 es UTC (~20 a 20 h en Chile).
+- Con **26 años**, las tendencias son una primera señal y no una atribución climática.
+
+---
+
 ## Cómo reproducirlo
 
 ```bash
@@ -88,13 +164,14 @@ pip install xarray dask distributed netCDF4 zarr gcsfs scipy matplotlib geopanda
 
 Las rutas se configuran con variables de entorno, así que no hay que editar el código:
 
-- `ERA5_DIR`: carpeta base del proyecto, donde se guardan la caché, los NetCDF diarios y los productos agregados. La leen los dos notebooks.
-- `ERA5_REGIONES`: ruta a `chile_region.geojson`, que se obtiene con el [proyecto de límites administrativos](https://github.com/Zelaznog-J/extraccion-limites-administrativos-overture). La lee el notebook de precipitación.
+- `ERA5_DIR`: carpeta base del proyecto, donde se guardan la caché, los NetCDF diarios y los productos agregados. La leen los tres notebooks.
+- `ERA5_REGIONES`: ruta a `chile_region.geojson`, que se obtiene con el [proyecto de límites administrativos](https://github.com/Zelaznog-J/extraccion-limites-administrativos-overture). La leen los notebooks de precipitación y temperatura.
 
 1. Ejecuta `era5_extraccion_diario.ipynb`. Descarga desde ARCO-ERA5 con caché anual (`cache_era5_chile/`) y genera los NetCDF diarios en `diario_era5_chile/`. Son varios GB, por eso no están en el repositorio.
 2. Ejecuta `era5_agregacion_precipitacion.ipynb`, que lee el diario del paso anterior y escribe los productos en `agregados_tp/`.
+3. Ejecuta `era5_agregacion_temperatura.ipynb`, que lee el diario de temperatura y escribe los productos en `agregados_t2m/`.
 
-Los productos NetCDF (`agregados_tp/*.nc`) tampoco se versionan porque se regeneran en el paso 2.
+Los productos NetCDF (`agregados_tp/*.nc` y `agregados_t2m/*.nc`) tampoco se versionan porque se regeneran en los pasos 2 y 3.
 
 ## Estructura
 
@@ -102,7 +179,11 @@ Los productos NetCDF (`agregados_tp/*.nc`) tampoco se versionan porque se regene
 exploring-era5-chile/
 ├── era5_extraccion_diario.ipynb
 ├── era5_agregacion_precipitacion.ipynb
+├── era5_agregacion_temperatura.ipynb
 ├── agregados_tp/
+│   ├── zonas_*.csv, ciudades_*.csv, resumen_zonas.csv
+│   └── figuras/            # 9 figuras PNG
+├── agregados_t2m/
 │   ├── zonas_*.csv, ciudades_*.csv, resumen_zonas.csv
 │   └── figuras/            # 9 figuras PNG
 ├── cache_era5_chile/       # (ignorado) caché horaria por año
