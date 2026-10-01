@@ -87,7 +87,7 @@ Las versiones originales están en [`agregados_tp/figuras/`](agregados_tp/figura
 Este proyecto convierte 26 años de temperatura diaria a 2 m en medias
 mensuales, estacionales y anuales, índices de extremos, grados-día y
 tendencias para Chile continental. Reutiliza el flujo con Dask del proyecto de
-precipitación.
+precipitación (Ver [`era5_agregacion_precipitacion.ipynb`](era5_agregacion_precipitacion.ipynb).
 
 | Aspecto | Detalle |
 |---|---|
