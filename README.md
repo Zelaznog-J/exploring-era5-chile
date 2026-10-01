@@ -15,8 +15,6 @@ cola de descargas.
 
 ## Precipitación en Chile 2000–2025
 
-![Tendencia de la precipitación anual 2000–2025](agregados_tp/figuras/08_tendencia_anual.png)
-
 Este proyecto convierte 26 años de precipitación diaria ERA5 en totales
 mensuales, estacionales y anuales, índices de extremos y tendencias para
 Chile continental.
@@ -52,6 +50,8 @@ Chile continental.
 
 ### Resultados
 
+![Tendencia de la precipitación anual 2000–2025](agregados_tp/figuras_web/08_tendencia_anual.webp)
+
 Entre 2000 y 2025 la precipitación disminuye de forma significativa en Chile central y sur.
 
 | Zona | Media anual (mm) | CV (%) | Tendencia (mm/década) | Tendencia (%/década) | p | % en invierno (JJA) | Año más húmedo | Año más seco |
@@ -68,9 +68,9 @@ Entre 2000 y 2025 la precipitación disminuye de forma significativa en Chile ce
 - **Gradiente norte–sur.** La media anual crece unas 19 veces desde el Norte Grande hasta el Austral.
 - **Regímenes opuestos.** El Centro concentra el 55 % de su lluvia en invierno. El Norte Grande recibe el 63 % en verano por el invierno altiplánico.
 
-![Climatología anual: precipitación media, variabilidad interanual y días húmedos](agregados_tp/figuras/01_mapas_climatologia_anual.png)
+![Climatología anual: precipitación media, variabilidad interanual y días húmedos](agregados_tp/figuras_web/01_mapas_climatologia_anual.webp)
 
-Todas las figuras están en [`agregados_tp/figuras/`](agregados_tp/figuras/), y las series por zona y ciudad en CSV en [`agregados_tp/`](agregados_tp/).
+Las versiones originales están en [`agregados_tp/figuras/`](agregados_tp/figuras/), las optimizadas para web en [`agregados_tp/figuras_web/`](agregados_tp/figuras_web/), y las series por zona y ciudad en CSV en [`agregados_tp/`](agregados_tp/).
 
 ### Limitaciones
 
@@ -82,7 +82,7 @@ Todas las figuras están en [`agregados_tp/figuras/`](agregados_tp/figuras/), y 
 
 ## Temperatura en Chile 2000–2025
 
-![Tendencia de la temperatura media, máxima y mínima 2000–2025](agregados_t2m/figuras/08_tendencia_anual.png)
+![Tendencia de la temperatura media, máxima y mínima 2000–2025](agregados_t2m/figuras_web/08_tendencia_anual.webp)
 
 Este proyecto convierte 26 años de temperatura diaria a 2 m en medias
 mensuales, estacionales y anuales, índices de extremos, grados-día y
@@ -143,9 +143,9 @@ En negrita, tendencias significativas (p < 0,05).
 - **Más extremos cálidos.** Los días sobre el percentil 90 (TX90p) suben 3,0 puntos por década en Chile y 4,5 en el Centro. Las noches frías (TN10p) no muestran cambio significativo.
 - **Agricultura y energía.** Los grados-día de crecimiento del Centro suben 63 °C·día por década, y los de calefacción bajan 92 °C·día por década en Chile.
 
-![Mapas de extremos y grados-día: heladas, días > 25 °C, HDD, TXx, TNn y GDD](agregados_t2m/figuras/07_mapas_indices_extremos.png)
+![Mapas de extremos y grados-día: heladas, días > 25 °C, HDD, TXx, TNn y GDD](agregados_t2m/figuras_web/07_mapas_indices_extremos.webp)
 
-Todas las figuras están en [`agregados_t2m/figuras/`](agregados_t2m/figuras/), y las series por zona y ciudad en CSV en [`agregados_t2m/`](agregados_t2m/).
+Las versiones originales están en [`agregados_t2m/figuras/`](agregados_t2m/figuras/), las optimizadas para web en [`agregados_t2m/figuras_web/`](agregados_t2m/figuras_web/), y las series por zona y ciudad en CSV en [`agregados_t2m/`](agregados_t2m/).
 
 ### Limitaciones
 
