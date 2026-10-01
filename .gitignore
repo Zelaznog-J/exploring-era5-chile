@@ -1,0 +1,19 @@
+# Datos pesados (se regeneran con los notebooks; GitHub no acepta archivos > 100 MB)
+cache_era5_chile/
+diario_era5_chile/
+*.nc
+
+# Borradores personales
+Post ERA5.txt
+Resumen del proyecto*.md
+
+# Python / Jupyter / Dask
+.ipynb_checkpoints/
+__pycache__/
+dask-worker-space/
+dask-scratch-space/
+
+# Sistema
+.DS_Store
+Thumbs.db
+.vscode/
