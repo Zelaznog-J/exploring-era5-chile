@@ -39,7 +39,7 @@ Chile continental.
 
 - **Dask perezoso, cómputo único.** Las secciones 2 a 6 solo arman grafos. Cada producto se calcula una vez en la sección 7. Calcularlo en memoria antes de escribir el NetCDF resultó unas 10 veces más rápido que escribir directamente desde Dask.
 - **Un solo bloque en el tiempo.** Así los percentiles, las rachas secas y los `resample` operan sobre la serie completa de cada celda sin reagrupar.
-- **Máscara de Chile** con el GeoJSON de las 16 regiones (Overture Maps, de mi [proyecto de límites administrativos](https://github.com/Zelaznog-J/extraccion-limites-administrativos-overture)) y `shapely.intersects_xy`.
+- **Máscara de Chile** con el GeoJSON de las 16 regiones (Overture Maps, de mi [proyecto de límites administrativos](https://github.com/Zelaznog-J/adm_bounds_overture)) y `shapely.intersects_xy`.
 - **Anomalía % solo donde la climatología es ≥ 1 mm/mes**, para no dividir casi por cero en el desierto.
 - **Ciudades sin máscara**, para no perder las ciudades costeras cuya celda cae mayormente en el mar.
 
@@ -165,7 +165,7 @@ pip install xarray dask distributed netCDF4 zarr gcsfs scipy matplotlib geopanda
 Las rutas se configuran con variables de entorno, así que no hay que editar el código:
 
 - `ERA5_DIR`: carpeta base del proyecto, donde se guardan la caché, los NetCDF diarios y los productos agregados. La leen los tres notebooks.
-- `ERA5_REGIONES`: ruta a `chile_region.geojson`, que se obtiene con el [proyecto de límites administrativos](https://github.com/Zelaznog-J/extraccion-limites-administrativos-overture). La leen los notebooks de precipitación y temperatura.
+- `ERA5_REGIONES`: ruta a `chile_region.geojson`, que se obtiene con el [proyecto de límites administrativos](https://github.com/Zelaznog-J/adm_bounds_overture). La leen los notebooks de precipitación y temperatura.
 
 1. Ejecuta `era5_extraccion_diario.ipynb`. Descarga desde ARCO-ERA5 con caché anual (`cache_era5_chile/`) y genera los NetCDF diarios en `diario_era5_chile/`. Son varios GB, por eso no están en el repositorio.
 2. Ejecuta `era5_agregacion_precipitacion.ipynb`, que lee el diario del paso anterior y escribe los productos en `agregados_tp/`.
